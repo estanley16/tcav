@@ -20,7 +20,7 @@ from __future__ import print_function
 from scipy.stats import ttest_ind
 import numpy as np
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 # helper function to output plot and write summary data
 def plot_results(results, savedir, plotname, random_counterpart=None, random_concepts=None, num_random_exp=100,
@@ -80,7 +80,19 @@ def plot_results(results, savedir, plotname, random_counterpart=None, random_con
   # to plot, must massage data again 
   plot_data = {}
   plot_concepts = []
-    
+  
+  #lists to collect data that will eventually be a csv file
+  concept_list = []
+  layer_list = []
+  TCAV_list = []
+  meanTCAV_list = []
+  stdTCAV_list = []
+  random_list = []
+  meanRandom_list = []
+  stdRandom_list = []
+  pval_list = []
+
+
   # print concepts and classes with indentation
   for concept in result_summary:
         
@@ -115,6 +127,29 @@ def plot_results(results, savedir, plotname, random_counterpart=None, random_con
             np.mean(random_i_ups[bottleneck]),
             np.std(random_i_ups[bottleneck]), p_val,
             "not significant" if p_val > min_p_val else "significant"))
+        
+        concept_list.append(concept)
+        layer_list.append(bottleneck)
+        TCAV_list.append(i_ups)
+        meanTCAV_list.append(np.mean(i_ups))
+        stdTCAV_list.append(np.std(i_ups))
+        random_list.append(random_i_ups[bottleneck])
+        meanRandom_list.append(np.mean(random_i_ups[bottleneck]))
+        stdRandom_list.append(np.std(random_i_ups[bottleneck]))
+        pval_list.append(p_val)
+                
+  df = pd.DataFrame()
+  df['concept'] = concept_list
+  df['layer'] = layer_list
+  df['TCAV scores'] = TCAV_list
+  df['mean TCAV score'] = meanTCAV_list
+  df['stdev TCAV score'] = stdTCAV_list
+  df['random scores'] = random_list
+  df['mean random score'] = meanRandom_list
+  df['stdev random score'] = stdRandom_list
+  df['p val'] = pval_list
+  
+  df.to_csv(savedir + plotname + '.csv')
         
   # subtract number of random experiments
   if random_counterpart:
